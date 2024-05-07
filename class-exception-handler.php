@@ -23,7 +23,7 @@ class Exception_Handler implements Exceptions_Handler {
 	 *
 	 * @param Throwable $e Exception thrown.
 	 */
-	public function report( Throwable $e ): void {
+	public function report( Throwable $e ) {
 		dump( static::class . '::' . __FUNCTION__ . '()', $e );
 	}
 
@@ -31,8 +31,9 @@ class Exception_Handler implements Exceptions_Handler {
 	 * Determine if the exception should be reported.
 	 *
 	 * @param Throwable $e Exception thrown.
+	 * @return bool
 	 */
-	public function should_report( Throwable $e ): bool {
+	public function should_report( Throwable $e ) {
 		return true;
 	}
 
@@ -52,8 +53,9 @@ class Exception_Handler implements Exceptions_Handler {
 	 *
 	 * @param OutputInterface $output
 	 * @param Throwable       $e
+	 * @return void
 	 */
-	public function render_for_console( OutputInterface $output, Throwable $e ): void {
+	public function render_for_console( OutputInterface $output, Throwable $e ) {
 		$output->writeln( "<error>Exception: {$e->getMessage()}</error>" );
 	}
 }
