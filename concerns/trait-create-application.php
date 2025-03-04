@@ -7,29 +7,17 @@
 
 namespace Mantle\Testkit\Concerns;
 
+use Mantle\Testkit\Application;
 use Mantle\Config\Repository;
 use Mantle\Contracts\Exceptions\Handler as Handler_Contract;
 use Mantle\Http\Request;
 use Mantle\Http\Routing\Url_Generator;
 use Mantle\Support\Collection;
-use Mantle\Testkit\Application;
 use Mantle\Testkit\Exception_Handler;
 use Symfony\Component\Routing\RouteCollection;
 
 /**
- * Concern for creating the application instance for Mantle TestKit.
- *
- * This trait is used to create a semi-isolated instance of the Mantle
- * Application that doesn't have all the bells and whistles of a full Mantle
- * Application. Notably, the service providers are never registered or booted
- * here.
- *
- * One thing to remember is that this package is largely used in isolation. The
- * dependent package will not have the files within the "framework" package and
- * cannot be used here. In a future version, we should consider loading the
- * framework's base configuration (in the config directory) instead of stubbing
- * out our defaults here. We should also consider reusing the bootloader here
- * and moving that to a standalone package.
+ * Concern for creating the application instance.
  */
 trait Create_Application {
 	/**
@@ -60,6 +48,7 @@ trait Create_Application {
 	 * Resolve application bindings.
 	 *
 	 * @param Application $app Application instance.
+	 * @return void
 	 */
 	final protected function resolve_application_bindings( $app ): void {
 		$app->singleton( Handler_Contract::class, Exception_Handler::class );
@@ -80,6 +69,8 @@ trait Create_Application {
 
 	/**
 	 * Default configuration for the test.
+	 *
+	 * @return array
 	 */
 	protected function get_application_config(): array {
 		return [
@@ -111,6 +102,7 @@ trait Create_Application {
 	 * Configuration for the test.
 	 *
 	 * @param Application $app Application instance.
+	 * @return array
 	 */
 	protected function override_application_config( $app ): array {
 		return [];
@@ -158,6 +150,7 @@ trait Create_Application {
 	 * Resolve application aliases.
 	 *
 	 * @param Application $app Application instance.
+	 * @return array
 	 */
 	final protected function resolve_application_providers( $app ): array {
 		$providers = new Collection( $this->get_application_providers( $app ) );
@@ -165,7 +158,9 @@ trait Create_Application {
 
 		if ( ! empty( $overrides ) ) {
 			$providers->transform(
-				static fn ( $provider ) => $overrides[ $provider ] ?? $provider
+				static function ( $provider ) use ( $overrides ) {
+					return $overrides[ $provider ] ?? $provider;
+				}
 			);
 		}
 

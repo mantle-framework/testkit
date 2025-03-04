@@ -2,8 +2,6 @@
 /**
  * Unit_Test_Case class file
  *
- * phpcs:disable Squiz.Functions.MultiLineFunctionDeclaration.ContentAfterBrace
- *
  * @package Mantle
  */
 
@@ -25,7 +23,7 @@ abstract class Unit_Test_Case extends Testing_Test_Case {
 	 *
 	 * @param array ...$args The array of arguments passed to the class.
 	 */
-	public function __construct( ...$args ) { // @phpstan-ignore-line final
+	public function __construct( ...$args ) {
 		parent::__construct( ...$args ); // @phpstan-ignore-line expects string|null
 
 		// Discard all of the WordPress global state.
