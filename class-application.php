@@ -103,7 +103,9 @@ class Application extends Container implements Application_Contract {
 	 * @param string $base_path Base path to set.
 	 * @param string $root_url Root URL of the application.
 	 */
-	public function __construct( string $base_path = '', string $root_url = null ) {
+	public function __construct( string $base_path = '', ?string $root_url = null ) {
+		static::$instance = $this;
+
 		if ( empty( $base_path ) && defined( 'MANTLE_BASE_DIR' ) ) {
 			$base_path = \MANTLE_BASE_DIR;
 		}
@@ -138,7 +140,6 @@ class Application extends Container implements Application_Contract {
 	 * Getter for the base path.
 	 *
 	 * @param string $path Path to append.
-	 * @return string
 	 */
 	public function get_base_path( string $path = '' ): string {
 		return $this->base_path . ( $path ? DIRECTORY_SEPARATOR . $path : '' );
@@ -148,7 +149,6 @@ class Application extends Container implements Application_Contract {
 	 * Get the path to the application "app" directory.
 	 *
 	 * @param string $path Path to append, optional.
-	 * @return string
 	 */
 	public function get_app_path( string $path = '' ): string {
 		$app_path = $this->app_path ?: $this->get_base_path( 'app' );
@@ -174,7 +174,6 @@ class Application extends Container implements Application_Contract {
 	 * Getter for the bootstrap path.
 	 *
 	 * @param string $path Path to append.
-	 * @return string
 	 */
 	public function get_bootstrap_path( string $path = '' ): string {
 		return ( $this->bootstrap_path ?: $this->base_path . DIRECTORY_SEPARATOR . 'bootstrap' ) . $path;
@@ -184,7 +183,6 @@ class Application extends Container implements Application_Contract {
 	 * Getter for the storage path.
 	 *
 	 * @param string $path Path to append.
-	 * @return string
 	 */
 	public function get_storage_path( string $path = '' ): string {
 		return ( $this->storage_path ?: $this->base_path . DIRECTORY_SEPARATOR . 'storage' ) . $path;
@@ -195,7 +193,7 @@ class Application extends Container implements Application_Contract {
 	 *
 	 * @param string $url Root URL to set.
 	 */
-	public function set_root_url( string $url ) {
+	public function set_root_url( string $url ): void {
 		$this->root_url = $url;
 	}
 
@@ -203,7 +201,6 @@ class Application extends Container implements Application_Contract {
 	 * Getter for the root URL.
 	 *
 	 * @param string $path Path to append.
-	 * @return string
 	 */
 	public function get_root_url( string $path = '' ): string {
 		return $this->root_url . ( $path ? DIRECTORY_SEPARATOR . $path : '' );
@@ -212,8 +209,6 @@ class Application extends Container implements Application_Contract {
 	/**
 	 * Get the cache folder root
 	 * Folder that stores all compiled server-side assets for the application.
-	 *
-	 * @return string
 	 */
 	public function get_cache_path(): string {
 		return $this->get_bootstrap_path( '/cache' );
@@ -223,8 +218,6 @@ class Application extends Container implements Application_Contract {
 	 * Get the cached Composer packages path.
 	 *
 	 * Used to store all auto-loaded packages that are Composer dependencies.
-	 *
-	 * @return string
 	 */
 	public function get_cached_packages_path(): string {
 		return $this->get_cache_path() . '/packages.php';
@@ -233,8 +226,6 @@ class Application extends Container implements Application_Contract {
 	/**
 	 * Get the cached model manifest path.
 	 * Used to store all auto-registered models that are in the application.
-	 *
-	 * @return string
 	 */
 	public function get_cached_models_path(): string {
 		return '';
@@ -242,8 +233,6 @@ class Application extends Container implements Application_Contract {
 
 	/**
 	 * Determine if the application is cached.
-	 *
-	 * @return bool
 	 */
 	public function is_configuration_cached(): bool {
 		return false;
@@ -251,8 +240,6 @@ class Application extends Container implements Application_Contract {
 
 	/**
 	 * Retrieve the cached configuration path.
-	 *
-	 * @return string
 	 */
 	public function get_cached_config_path(): string {
 		return '';
@@ -260,8 +247,6 @@ class Application extends Container implements Application_Contract {
 
 	/**
 	 * Determine if events are cached.
-	 *
-	 * @return bool
 	 */
 	public function is_events_cached(): bool {
 		return false;
@@ -269,8 +254,6 @@ class Application extends Container implements Application_Contract {
 
 	/**
 	 * Retrieve the cached configuration path.
-	 *
-	 * @return string
 	 */
 	public function get_cached_events_path(): string {
 		return '';
@@ -278,8 +261,6 @@ class Application extends Container implements Application_Contract {
 
 	/**
 	 * Get the path to the application configuration files.
-	 *
-	 * @return string
 	 */
 	public function get_config_path(): string {
 		return '';
@@ -287,8 +268,6 @@ class Application extends Container implements Application_Contract {
 
 	/**
 	 * Determine if the application has been bootstrapped before.
-	 *
-	 * @return bool
 	 */
 	public function has_been_bootstrapped(): bool {
 		return (bool) $this->has_been_bootstrapped;
@@ -312,11 +291,11 @@ class Application extends Container implements Application_Contract {
 	 * Register the base service providers.
 	 */
 	protected function register_base_service_providers() {
-		$this->singleton( 'events', fn( $app ) => new Dispatcher( $app ) );
+		$this->singleton( 'events', fn ( $app ) => new Dispatcher( $app ) );
 
 		$this->singleton(
 			Generator::class,
-			function() {
+			function () {
 				$factory = Factory::create();
 
 				$factory->unique( true );
@@ -336,7 +315,7 @@ class Application extends Container implements Application_Contract {
 	 * @param string[]        $bootstrappers Class names of packages to boot.
 	 * @param Kernel_Contract $kernel Kernel instance.
 	 */
-	public function bootstrap_with( array $bootstrappers, Kernel_Contract $kernel ) {
+	public function bootstrap_with( array $bootstrappers, Kernel_Contract $kernel ): never {
 		throw new RuntimeException( 'Not supported with Testkit' );
 	}
 
@@ -346,7 +325,6 @@ class Application extends Container implements Application_Contract {
 	 * @throws RuntimeException Thrown on use.
 	 *
 	 * @param string $name Provider class name.
-	 * @return Service_Provider|null
 	 */
 	public function get_provider( string $name ): ?Service_Provider {
 		throw new RuntimeException( 'Not supported with Testkit' );
@@ -354,8 +332,6 @@ class Application extends Container implements Application_Contract {
 
 	/**
 	 * Get all service providers.
-	 *
-	 * @return array
 	 */
 	public function get_providers(): array {
 		return [];
@@ -367,7 +343,6 @@ class Application extends Container implements Application_Contract {
 	 * @throws RuntimeException Thrown on use.
 	 *
 	 * @param Service_Provider|string $provider Service provider to register.
-	 * @return static
 	 */
 	public function register( Service_Provider|string $provider ): static {
 		throw new RuntimeException( 'Not supported with Testkit' );
@@ -375,8 +350,6 @@ class Application extends Container implements Application_Contract {
 
 	/**
 	 * Determine if the application has booted.
-	 *
-	 * @return bool
 	 */
 	public function is_booted(): bool {
 		return $this->booted;
@@ -397,9 +370,8 @@ class Application extends Container implements Application_Contract {
 	 * Set and retrieve the environment file name.
 	 *
 	 * @param string $file File name to set.
-	 * @return string
 	 */
-	public function environment_file( string $file = null ): string {
+	public function environment_file( ?string $file = null ): string {
 		if ( $file ) {
 			$this->environment_file = $file;
 		}
@@ -413,7 +385,7 @@ class Application extends Container implements Application_Contract {
 	 * @param string $path Path to set, optional.
 	 * @return string
 	 */
-	public function environment_path( string $path = null ): ?string {
+	public function environment_path( ?string $path = null ): ?string {
 		if ( $path ) {
 			$this->environment_path = $path;
 		}
@@ -423,8 +395,6 @@ class Application extends Container implements Application_Contract {
 
 	/**
 	 * Get the Application's Environment
-	 *
-	 * @return string
 	 */
 	public function environment(): string {
 		if ( ! empty( $this->environment ) ) {
@@ -438,16 +408,13 @@ class Application extends Container implements Application_Contract {
 	 * Check if the Application's Environment matches a list.
 	 *
 	 * @param string|array ...$environments Environments to check.
-	 * @return bool
 	 */
 	public function is_environment( ...$environments ): bool {
-		return in_array( $this->environment(), (array) $environments, true );
+		return in_array( $this->environment(), $environments, true );
 	}
 
 	/**
 	 * Get the application namespace.
-	 *
-	 * @return string
 	 *
 	 * @throws RuntimeException Thrown on error determining namespace.
 	 */
@@ -459,8 +426,6 @@ class Application extends Container implements Application_Contract {
 	 * Alias to get_namespace().
 	 *
 	 * @throws RuntimeException Thrown on error determining namespace.
-	 *
-	 * @return string
 	 */
 	public function namespace(): string {
 		return $this->get_namespace();
@@ -468,8 +433,6 @@ class Application extends Container implements Application_Contract {
 
 	/**
 	 * Check if the application is running in the console (wp-cli).
-	 *
-	 * @return bool
 	 */
 	public function is_running_in_console(): bool {
 		return false;
@@ -477,8 +440,6 @@ class Application extends Container implements Application_Contract {
 
 	/**
 	 * Check if the application is running in console isolation mode.
-	 *
-	 * @return bool
 	 */
 	public function is_running_in_console_isolation(): bool {
 		return false;
@@ -512,7 +473,6 @@ class Application extends Container implements Application_Contract {
 	 * @throws RuntimeException Thrown on use.
 	 *
 	 * @param callable $callback Callback for the listener.
-	 * @return static
 	 */
 	public function booted( callable $callback ): static {
 		throw new RuntimeException( 'Not supported with Testkit' );
@@ -524,7 +484,6 @@ class Application extends Container implements Application_Contract {
 	 * @throws RuntimeException Thrown on use.
 	 *
 	 * @param callable $callback Callback for the listener.
-	 * @return static
 	 */
 	public function terminating( callable $callback ): static {
 		throw new RuntimeException( 'Not supported with Testkit' );
